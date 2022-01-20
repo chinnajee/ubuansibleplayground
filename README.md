@@ -1,5 +1,9 @@
 # Interactive Katacoda Scenarios
 
+mkdir -p /opt/kata-materials && cd /opt/kata-materials && git clone --depth 1 https://github.com/irixjp/katacoda-scenarios.git . && pip install virtualenv && virtualenv ansible && source /opt/kata-materials/ansible/bin/activate && cd tools && bash ./kata_setup.sh && cd ~/
+
+
+
 [![](http://shields.katacoda.com/katacoda/irixjp/count.svg)](https://www.katacoda.com/irixjp "Get your profile on Katacoda.com")
 
 Visit https://www.katacoda.com/irixjp to view the profile and interactive scenarios
