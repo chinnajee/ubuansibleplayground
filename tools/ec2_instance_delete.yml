@@ -1,0 +1,60 @@
+---
+- name: Cleanup handson environment
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Delete the inventory file
+      file:
+        path: "{{ INVENTORY_PATH }}"
+        state: absent
+
+    - name: Collect instance info
+      amazon.aws.ec2_instance_info:
+        region: "{{ REGION }}"
+        filters:
+          "tag:role": "{{ RESOURCE_TAG_ROLE }}"
+      register: ec2
+
+    - debug: var=ec2.instances
+
+    - name: Retrive instance ids
+      set_fact:
+        delete_ids: "{{ ec2.instances | community.general.json_query(query) }}"
+      vars:
+        query: "[*].instance_id"
+
+    - debug: var=delete_ids
+
+    - name: Delete instances
+      amazon.aws.ec2:
+        state: absent
+        instance_ids: "{{ delete_ids }}"
+        region: "{{ REGION }}"
+      when: delete_ids | length > 0
+
+    - name: delete retrive files
+      file:
+        path: /jupyter/tmp
+        state: absent
+
+    - name: get student pems
+      find:
+        paths: /jupyter
+        patterns: student*.pem
+      register: files_to_delete
+
+    - name: delete student keypair
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ files_to_delete.files }}"
+
+    - name: delete jupyter url file
+      file:
+        path: /jupyter/jupyter_url.txt
+        state: absent
+
+    - name: delete teacher inventory
+      file:
+        path: /jupyter/inv_teacher
+        state: absent
